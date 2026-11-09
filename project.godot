@@ -9,6 +9,10 @@ config_version=5
 config/name="CyberSurge: Neon Protocol"
 config/features=PackedStringArray("4.7", "GL Compatibility")
 
+[autoload]
+
+GameData="*res://scripts/GameData.gd"
+
 [display]
 
 window/size/viewport_width=1280
