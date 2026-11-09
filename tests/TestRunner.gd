@@ -25,6 +25,8 @@ func run_all_tests() -> bool:
 		return false
 	if not test_ui_and_shop():
 		return false
+	if not test_main_game_flow():
+		return false
 	return true
 
 func test_project_bootstrap() -> bool:
@@ -173,17 +175,8 @@ func test_enemy_hierarchy() -> bool:
 func test_ui_and_shop() -> bool:
 	print("[TEST] test_ui_and_shop...")
 	var hud_scene = load("res://scenes/ui/HUD.tscn")
-	if not hud_scene:
-		print("  FAIL: HUD.tscn not found.")
-		return false
 	var shop_scene = load("res://scenes/ui/ShopModal.tscn")
-	if not shop_scene:
-		print("  FAIL: ShopModal.tscn not found.")
-		return false
 	var gameover_scene = load("res://scenes/ui/GameOverModal.tscn")
-	if not gameover_scene:
-		print("  FAIL: GameOverModal.tscn not found.")
-		return false
 		
 	var hud = hud_scene.instantiate()
 	root.add_child(hud)
@@ -201,8 +194,23 @@ func test_ui_and_shop() -> bool:
 	
 	var gameover = gameover_scene.instantiate()
 	root.add_child(gameover)
-	gameover.show_result(true, 120, 45) # Victory
+	gameover.show_result(true, 120, 45)
 	gameover.queue_free()
 	
 	print("  PASS: UI HUD, ShopModal, and GameOverModal verified.")
+	return true
+
+func test_main_game_flow() -> bool:
+	print("[TEST] test_main_game_flow...")
+	var main_scene = load("res://scenes/main/Main.tscn")
+	if not main_scene:
+		print("  FAIL: Main.tscn not found.")
+		return false
+	var main = main_scene.instantiate()
+	root.add_child(main)
+	if not main.has_method("start_wave") or not main.has_method("end_wave"):
+		main.queue_free()
+		return false
+	main.queue_free()
+	print("  PASS: Main game flow controller verified.")
 	return true

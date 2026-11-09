@@ -1,0 +1,25 @@
+[gd_scene format=3 uid="uid://cymain001"]
+
+[ext_resource type="Script" path="res://scenes/main/Main.gd" id="1_main"]
+[ext_resource type="PackedScene" path="res://scenes/entities/player/Player.tscn" id="2_player"]
+[ext_resource type="PackedScene" path="res://scenes/ui/HUD.tscn" id="3_hud"]
+[ext_resource type="PackedScene" path="res://scenes/ui/ShopModal.tscn" id="4_shop"]
+[ext_resource type="PackedScene" path="res://scenes/ui/GameOverModal.tscn" id="5_gameover"]
+
+[node name="Main" type="Node2D"]
+script = ExtResource("1_main")
+
+[node name="Camera2D" type="Camera2D" parent="."]
+position_smoothing_enabled = true
+
+[node name="EnemiesContainer" type="Node2D" parent="."]
+
+[node name="Player" parent="." instance=ExtResource("2_player")]
+
+[node name="WeaponsContainer" type="Node2D" parent="Player"]
+
+[node name="HUD" parent="." instance=ExtResource("3_hud")]
+
+[node name="ShopModal" parent="." instance=ExtResource("4_shop")]
+
+[node name="GameOverModal" parent="." instance=ExtResource("5_gameover")]
