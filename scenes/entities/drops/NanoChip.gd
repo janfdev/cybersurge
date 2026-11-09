@@ -10,6 +10,7 @@ var _target: Node2D = null
 var _current_speed: float = 0.0
 
 func _ready() -> void:
+	add_to_group("drops")
 	collision_layer = 8 # Drops layer
 	collision_mask = 2 # Player layer
 	area_entered.connect(_on_area_entered)

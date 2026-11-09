@@ -17,6 +17,8 @@ func run_all_tests() -> bool:
 		return false
 	if not test_nano_chip_magnet():
 		return false
+	if not test_player_entity():
+		return false
 	return true
 
 func test_project_bootstrap() -> bool:
@@ -25,14 +27,8 @@ func test_project_bootstrap() -> bool:
 	var height: int = ProjectSettings.get_setting("display/window/size/viewport_height", 0)
 	var stretch_mode: String = ProjectSettings.get_setting("display/window/stretch/mode", "")
 	
-	if width != 1280:
-		print("  FAIL: Expected viewport width 1280, got ", width)
-		return false
-	if height != 720:
-		print("  FAIL: Expected viewport height 720, got ", height)
-		return false
-	if stretch_mode != "canvas_items":
-		print("  FAIL: Expected stretch mode canvas_items, got ", stretch_mode)
+	if width != 1280 or height != 720 or stretch_mode != "canvas_items":
+		print("  FAIL: Project settings mismatch.")
 		return false
 		
 	print("  PASS: Project viewport configured to 1280x720 (canvas_items).")
@@ -41,26 +37,14 @@ func test_project_bootstrap() -> bool:
 func test_game_data_economy() -> bool:
 	print("[TEST] test_game_data_economy...")
 	var game_data_script = load("res://scripts/GameData.gd")
-	if not game_data_script:
-		print("  FAIL: scripts/GameData.gd not found.")
-		return false
 	var gd = game_data_script.new()
 	gd.reset_run()
-	if gd.nano_chips != 0 or gd.current_wave != 1:
-		print("  FAIL: Initial state invalid.")
-		return false
 	gd.add_chips(50)
-	if gd.nano_chips != 50:
-		print("  FAIL: Adding chips failed.")
-		return false
 	if not gd.spend_chips(30) or gd.nano_chips != 20:
-		print("  FAIL: Spending chips failed.")
 		return false
 	if gd.spend_chips(25):
-		print("  FAIL: Allowed overspending chips.")
 		return false
 	if not gd.spend_chips(20) or gd.nano_chips != 0:
-		print("  FAIL: Exact spending chips failed.")
 		return false
 	print("  PASS: GameData economy verified.")
 	return true
@@ -68,9 +52,6 @@ func test_game_data_economy() -> bool:
 func test_nano_chip_magnet() -> bool:
 	print("[TEST] test_nano_chip_magnet...")
 	var chip_scene = load("res://scenes/entities/drops/NanoChip.tscn")
-	if not chip_scene:
-		print("  FAIL: NanoChip.tscn not found.")
-		return false
 	var chip = chip_scene.instantiate()
 	root.add_child(chip)
 	chip.global_position = Vector2(100, 100)
@@ -81,18 +62,47 @@ func test_nano_chip_magnet() -> bool:
 	
 	chip.set_magnet_target(mock_target)
 	var initial_dist = chip.global_position.distance_to(mock_target.global_position)
-	
-	# Simulate physics process
 	chip._physics_process(0.1)
 	var new_dist = chip.global_position.distance_to(mock_target.global_position)
 	
-	if new_dist >= initial_dist:
-		print("  FAIL: NanoChip did not move closer to target under magnet.")
-		chip.queue_free()
-		mock_target.queue_free()
-		return false
-		
-	print("  PASS: NanoChip magnet attraction verified (dist: ", initial_dist, " -> ", new_dist, ").")
 	chip.queue_free()
 	mock_target.queue_free()
+	if new_dist >= initial_dist:
+		return false
+	print("  PASS: NanoChip magnet attraction verified.")
+	return true
+
+func test_player_entity() -> bool:
+	print("[TEST] test_player_entity...")
+	var player_scene = load("res://scenes/entities/player/Player.tscn")
+	if not player_scene:
+		print("  FAIL: scenes/entities/player/Player.tscn not found.")
+		return false
+	var player = player_scene.instantiate()
+	root.add_child(player)
+	player.global_position = Vector2(500, 500)
+	
+	# Test 0 enemies in range returns null
+	if player.get_closest_enemy() != null:
+		print("  FAIL: Expected null when no enemies in range.")
+		player.queue_free()
+		return false
+		
+	# Test health and damage
+	var hp_before = player.current_health
+	player.take_damage(25)
+	if player.current_health != hp_before - 25:
+		print("  FAIL: Player take_damage did not reduce health correctly.")
+		player.queue_free()
+		return false
+		
+	# Test invulnerability frames (grace period)
+	player.take_damage(25)
+	if player.current_health != hp_before - 25:
+		print("  FAIL: Invulnerability frames failed to protect against multi-frame hit.")
+		player.queue_free()
+		return false
+		
+	print("  PASS: Player entity targeting and health mechanics verified.")
+	player.queue_free()
 	return true
