@@ -1,0 +1,14 @@
+[gd_scene format=3 uid="uid://cydrone001"]
+
+[ext_resource type="Script" path="res://scenes/entities/enemies/DroneEnemy.gd" id="1_drone"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_drone"]
+radius = 8.0
+
+[node name="DroneEnemy" type="CharacterBody2D"]
+collision_layer = 4
+collision_mask = 3
+script = ExtResource("1_drone")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_drone")

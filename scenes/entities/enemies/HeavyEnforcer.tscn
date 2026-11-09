@@ -1,0 +1,14 @@
+[gd_scene format=3 uid="uid://cyenforcer001"]
+
+[ext_resource type="Script" path="res://scenes/entities/enemies/HeavyEnforcer.gd" id="1_enforcer"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_enforcer"]
+radius = 16.0
+
+[node name="HeavyEnforcer" type="CharacterBody2D"]
+collision_layer = 4
+collision_mask = 3
+script = ExtResource("1_enforcer")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_enforcer")

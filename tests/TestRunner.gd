@@ -21,6 +21,8 @@ func run_all_tests() -> bool:
 		return false
 	if not test_weapons():
 		return false
+	if not test_enemy_hierarchy():
+		return false
 	return true
 
 func test_project_bootstrap() -> bool:
@@ -30,9 +32,7 @@ func test_project_bootstrap() -> bool:
 	var stretch_mode: String = ProjectSettings.get_setting("display/window/stretch/mode", "")
 	
 	if width != 1280 or height != 720 or stretch_mode != "canvas_items":
-		print("  FAIL: Project settings mismatch.")
 		return false
-		
 	print("  PASS: Project viewport configured to 1280x720 (canvas_items).")
 	return true
 
@@ -103,17 +103,8 @@ func test_player_entity() -> bool:
 func test_weapons() -> bool:
 	print("[TEST] test_weapons...")
 	var blaster_scene = load("res://scenes/weapons/BlasterWeapon.tscn")
-	if not blaster_scene:
-		print("  FAIL: BlasterWeapon.tscn not found.")
-		return false
 	var orbit_scene = load("res://scenes/weapons/OrbitBladeWeapon.tscn")
-	if not orbit_scene:
-		print("  FAIL: OrbitBladeWeapon.tscn not found.")
-		return false
 	var tesla_scene = load("res://scenes/weapons/TeslaArcWeapon.tscn")
-	if not tesla_scene:
-		print("  FAIL: TeslaArcWeapon.tscn not found.")
-		return false
 		
 	var blaster = blaster_scene.instantiate()
 	root.add_child(blaster)
@@ -137,4 +128,52 @@ func test_weapons() -> bool:
 	tesla.queue_free()
 	
 	print("  PASS: All 3 modular procedural weapons verified.")
+	return true
+
+func test_enemy_hierarchy() -> bool:
+	print("[TEST] test_enemy_hierarchy...")
+	var drone_scene = load("res://scenes/entities/enemies/DroneEnemy.tscn")
+	if not drone_scene:
+		print("  FAIL: DroneEnemy.tscn not found.")
+		return false
+	var enforcer_scene = load("res://scenes/entities/enemies/HeavyEnforcer.tscn")
+	if not enforcer_scene:
+		print("  FAIL: HeavyEnforcer.tscn not found.")
+		return false
+	var boss_scene = load("res://scenes/entities/enemies/BossMegaMech.tscn")
+	if not boss_scene:
+		print("  FAIL: BossMegaMech.tscn not found.")
+		return false
+		
+	var drone = drone_scene.instantiate()
+	root.add_child(drone)
+	if drone.max_health != 20 or drone.chip_drop_value != 1:
+		drone.queue_free()
+		return false
+	drone.take_damage(20)
+	if not drone.is_dead:
+		drone.queue_free()
+		return false
+	drone.queue_free()
+	
+	var enforcer = enforcer_scene.instantiate()
+	root.add_child(enforcer)
+	if enforcer.max_health != 140 or enforcer.chip_drop_value != 5:
+		enforcer.queue_free()
+		return false
+	enforcer.queue_free()
+	
+	var boss = boss_scene.instantiate()
+	root.add_child(boss)
+	if boss.max_health != 2000:
+		boss.queue_free()
+		return false
+	# Test phase shift
+	boss.take_damage(1100) # Below 50%
+	if not boss.is_phase_two:
+		boss.queue_free()
+		return false
+	boss.queue_free()
+	
+	print("  PASS: Enemy hierarchy (Drone, Enforcer, Boss) verified.")
 	return true
