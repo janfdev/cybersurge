@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://cyweaponblaster01"]
+
+[ext_resource type="Script" path="res://scenes/weapons/BlasterWeapon.gd" id="1_blaster"]
+
+[node name="BlasterWeapon" type="Node2D"]
+script = ExtResource("1_blaster")

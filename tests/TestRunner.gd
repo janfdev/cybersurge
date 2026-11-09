@@ -19,6 +19,8 @@ func run_all_tests() -> bool:
 		return false
 	if not test_player_entity():
 		return false
+	if not test_weapons():
+		return false
 	return true
 
 func test_project_bootstrap() -> bool:
@@ -75,34 +77,64 @@ func test_nano_chip_magnet() -> bool:
 func test_player_entity() -> bool:
 	print("[TEST] test_player_entity...")
 	var player_scene = load("res://scenes/entities/player/Player.tscn")
-	if not player_scene:
-		print("  FAIL: scenes/entities/player/Player.tscn not found.")
-		return false
 	var player = player_scene.instantiate()
 	root.add_child(player)
 	player.global_position = Vector2(500, 500)
 	
-	# Test 0 enemies in range returns null
 	if player.get_closest_enemy() != null:
-		print("  FAIL: Expected null when no enemies in range.")
 		player.queue_free()
 		return false
 		
-	# Test health and damage
 	var hp_before = player.current_health
 	player.take_damage(25)
 	if player.current_health != hp_before - 25:
-		print("  FAIL: Player take_damage did not reduce health correctly.")
 		player.queue_free()
 		return false
 		
-	# Test invulnerability frames (grace period)
 	player.take_damage(25)
 	if player.current_health != hp_before - 25:
-		print("  FAIL: Invulnerability frames failed to protect against multi-frame hit.")
 		player.queue_free()
 		return false
 		
 	print("  PASS: Player entity targeting and health mechanics verified.")
 	player.queue_free()
+	return true
+
+func test_weapons() -> bool:
+	print("[TEST] test_weapons...")
+	var blaster_scene = load("res://scenes/weapons/BlasterWeapon.tscn")
+	if not blaster_scene:
+		print("  FAIL: BlasterWeapon.tscn not found.")
+		return false
+	var orbit_scene = load("res://scenes/weapons/OrbitBladeWeapon.tscn")
+	if not orbit_scene:
+		print("  FAIL: OrbitBladeWeapon.tscn not found.")
+		return false
+	var tesla_scene = load("res://scenes/weapons/TeslaArcWeapon.tscn")
+	if not tesla_scene:
+		print("  FAIL: TeslaArcWeapon.tscn not found.")
+		return false
+		
+	var blaster = blaster_scene.instantiate()
+	root.add_child(blaster)
+	if blaster.base_damage <= 0 or blaster.cooldown <= 0.0:
+		blaster.queue_free()
+		return false
+	blaster.queue_free()
+	
+	var orbit = orbit_scene.instantiate()
+	root.add_child(orbit)
+	if orbit.orbit_radius <= 0.0:
+		orbit.queue_free()
+		return false
+	orbit.queue_free()
+	
+	var tesla = tesla_scene.instantiate()
+	root.add_child(tesla)
+	if tesla.max_chains < 2:
+		tesla.queue_free()
+		return false
+	tesla.queue_free()
+	
+	print("  PASS: All 3 modular procedural weapons verified.")
 	return true
