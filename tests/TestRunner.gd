@@ -23,6 +23,8 @@ func run_all_tests() -> bool:
 		return false
 	if not test_enemy_hierarchy():
 		return false
+	if not test_ui_and_shop():
+		return false
 	return true
 
 func test_project_bootstrap() -> bool:
@@ -133,17 +135,8 @@ func test_weapons() -> bool:
 func test_enemy_hierarchy() -> bool:
 	print("[TEST] test_enemy_hierarchy...")
 	var drone_scene = load("res://scenes/entities/enemies/DroneEnemy.tscn")
-	if not drone_scene:
-		print("  FAIL: DroneEnemy.tscn not found.")
-		return false
 	var enforcer_scene = load("res://scenes/entities/enemies/HeavyEnforcer.tscn")
-	if not enforcer_scene:
-		print("  FAIL: HeavyEnforcer.tscn not found.")
-		return false
 	var boss_scene = load("res://scenes/entities/enemies/BossMegaMech.tscn")
-	if not boss_scene:
-		print("  FAIL: BossMegaMech.tscn not found.")
-		return false
 		
 	var drone = drone_scene.instantiate()
 	root.add_child(drone)
@@ -168,12 +161,48 @@ func test_enemy_hierarchy() -> bool:
 	if boss.max_health != 2000:
 		boss.queue_free()
 		return false
-	# Test phase shift
-	boss.take_damage(1100) # Below 50%
+	boss.take_damage(1100)
 	if not boss.is_phase_two:
 		boss.queue_free()
 		return false
 	boss.queue_free()
 	
 	print("  PASS: Enemy hierarchy (Drone, Enforcer, Boss) verified.")
+	return true
+
+func test_ui_and_shop() -> bool:
+	print("[TEST] test_ui_and_shop...")
+	var hud_scene = load("res://scenes/ui/HUD.tscn")
+	if not hud_scene:
+		print("  FAIL: HUD.tscn not found.")
+		return false
+	var shop_scene = load("res://scenes/ui/ShopModal.tscn")
+	if not shop_scene:
+		print("  FAIL: ShopModal.tscn not found.")
+		return false
+	var gameover_scene = load("res://scenes/ui/GameOverModal.tscn")
+	if not gameover_scene:
+		print("  FAIL: GameOverModal.tscn not found.")
+		return false
+		
+	var hud = hud_scene.instantiate()
+	root.add_child(hud)
+	hud.update_health(80, 100)
+	hud.update_wave(3)
+	hud.update_chips(42)
+	hud.queue_free()
+	
+	var shop = shop_scene.instantiate()
+	root.add_child(shop)
+	if not shop.has_method("open_shop") or not shop.has_method("select_option"):
+		shop.queue_free()
+		return false
+	shop.queue_free()
+	
+	var gameover = gameover_scene.instantiate()
+	root.add_child(gameover)
+	gameover.show_result(true, 120, 45) # Victory
+	gameover.queue_free()
+	
+	print("  PASS: UI HUD, ShopModal, and GameOverModal verified.")
 	return true
