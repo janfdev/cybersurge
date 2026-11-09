@@ -1,0 +1,12 @@
+res://scenes/entities/drops/NanoChip.tscn::f6df1e214d3c598a28d6b17f743c6a77::1794266567::res://.godot/exported/133200997/export-321f2f78ce9332ea5f5f769057cc67d8-NanoChip.scn
+res://scenes/entities/enemies/BossMegaMech.tscn::efe07e99aaeb3afeca9eb6c9abe188f5::1794266567::res://.godot/exported/133200997/export-63f47a453cfa7a13a1692ed8971be8c4-BossMegaMech.scn
+res://scenes/entities/enemies/DroneEnemy.tscn::6fe7f5c20d93e21ff351cac9e65a0304::1794266567::res://.godot/exported/133200997/export-8f8042b149795e547e958359f4b94fdf-DroneEnemy.scn
+res://scenes/entities/enemies/HeavyEnforcer.tscn::7235e84c9432ca9d01abe2451e7005cd::1794266567::res://.godot/exported/133200997/export-83ecce41553dda8c49d3dbe5b40f27c4-HeavyEnforcer.scn
+res://scenes/entities/player/Player.tscn::78181d9f62041a469ae1cb216886f9e2::1794266567::res://.godot/exported/133200997/export-9294d13a53d694c6d7ca1faf77f4242e-Player.scn
+res://scenes/main/Main.tscn::13705d8937f77af0c40d99b8c1b54ee5::1794266567::res://.godot/exported/133200997/export-68a04552abb3f12a362e1db2098e38c9-Main.scn
+res://scenes/ui/GameOverModal.tscn::13310f336bb3e9ed81fe9e635f2d0e17::1794266567::res://.godot/exported/133200997/export-13b5de8028fe6c2a6000e1c95eae1ec9-GameOverModal.scn
+res://scenes/ui/HUD.tscn::6772bbd07035eb1ce5a102671defb9ce::1794266567::res://.godot/exported/133200997/export-74b5c9848938f4eb9ebaf6fab3809318-HUD.scn
+res://scenes/ui/ShopModal.tscn::2bdef872f956005b9e0f72ce4c57071f::1794266567::res://.godot/exported/133200997/export-67aa69c15321ab39acd48da209de7026-ShopModal.scn
+res://scenes/weapons/BlasterWeapon.tscn::7579016ec5061f47b90ee740ff198e20::1794266567::res://.godot/exported/133200997/export-40b5da0def9545288dcdf221051ec796-BlasterWeapon.scn
+res://scenes/weapons/OrbitBladeWeapon.tscn::6f0d28c9f43e8b3ed7306a63addb4de0::1794266567::res://.godot/exported/133200997/export-a2d90237f6285f42223d6291378daf81-OrbitBladeWeapon.scn
+res://scenes/weapons/TeslaArcWeapon.tscn::f86a5b3628105c5ce9c04edcf9102fb0::1794266567::res://.godot/exported/133200997/export-e2a6cc04fb116f844175ce36a2214707-TeslaArcWeapon.scn
