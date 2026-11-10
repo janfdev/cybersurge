@@ -78,6 +78,7 @@ func _input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
 		if Input.get_mouse_mode() != Input.MOUSE_MODE_CAPTURED:
 			Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
+		try_fire()
 	elif event.is_action_pressed("ui_cancel"):
 		if Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
 			Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
@@ -124,14 +125,14 @@ func _physics_process(delta: float) -> void:
 		_bob_timer = move_toward(_bob_timer, 0.0, delta * 8.0)
 
 	move_and_slide()
-	
-	# Handle shooting & reloading inputs
-	if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
-		try_fire()
-	if Input.is_key_pressed(KEY_R):
-		try_reload()
-		
 	_process_gun_bob_and_recoil(delta, direction != Vector3.ZERO)
+	
+func _unhandled_input(event: InputEvent) -> void:
+	if is_dead:
+		return
+	if event is InputEventKey and event.pressed:
+		if event.keycode == KEY_R:
+			try_reload()
 
 func try_fire() -> void:
 	if not can_fire or is_reloading or is_dead:
@@ -145,9 +146,9 @@ func try_fire() -> void:
 	current_ammo -= 1
 	ammo_changed.emit(current_ammo, mag_capacity, reserve_ammo)
 	
-	# Apply visual recoil
-	_recoil_rot += 0.22
-	_recoil_pos.z += 0.08
+	# Apply visual recoil (snappy kickback and muzzle rise)
+	_recoil_rot = clamp(_recoil_rot + 0.18, 0.0, 0.35)
+	_recoil_pos.z = clamp(_recoil_pos.z + 0.06, 0.0, 0.12)
 	_flash_muzzle()
 	
 	# Hitscan Shooting
@@ -187,10 +188,12 @@ func try_reload() -> void:
 		return
 		
 	is_reloading = true
-	# Lower gun animation
+	# Lower gun animation & reset recoil
+	_recoil_rot = 0.0
+	_recoil_pos = Vector3.ZERO
 	var tween = create_tween()
-	tween.tween_property(gun_pivot, "position:y", -0.4, reload_time * 0.4)
-	tween.tween_property(gun_pivot, "position:y", 0.0, reload_time * 0.6)
+	tween.tween_property(gun_pivot, "position:y", -0.35, reload_time * 0.4).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	tween.tween_property(gun_pivot, "position:y", 0.0, reload_time * 0.6).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
 	
 	await get_tree().create_timer(reload_time).timeout
 	var needed: int = mag_capacity - current_ammo
@@ -201,17 +204,18 @@ func try_reload() -> void:
 	ammo_changed.emit(current_ammo, mag_capacity, reserve_ammo)
 
 func _process_gun_bob_and_recoil(delta: float, is_moving: bool) -> void:
-	# Recover from recoil
-	_recoil_rot = lerp(_recoil_rot, 0.0, delta * 18.0)
-	_recoil_pos = _recoil_pos.lerp(Vector3.ZERO, delta * 18.0)
+	if not gun_mesh:
+		return
+	# Recover from recoil with smooth exponential decay
+	_recoil_rot = lerp(_recoil_rot, 0.0, delta * 14.0)
+	_recoil_pos = _recoil_pos.lerp(Vector3.ZERO, delta * 14.0)
 	
 	# Bobbing
-	var bob_x := sin(_bob_timer) * 0.015 if is_moving else 0.0
-	var bob_y := cos(_bob_timer * 2.0) * 0.015 if is_moving else 0.0
+	var bob_x := sin(_bob_timer) * 0.012 if is_moving else 0.0
+	var bob_y := cos(_bob_timer * 2.0) * 0.012 if is_moving else 0.0
 	
 	gun_mesh.position = _orig_gun_pos + _recoil_pos + Vector3(bob_x, bob_y, 0)
-	gun_mesh.rotation.x = _recoil_rot
-	gun_mesh.rotation.z = -bob_x * 2.0
+	gun_mesh.rotation = Vector3(_recoil_rot, 0.0, -bob_x * 1.5)
 
 func _flash_muzzle() -> void:
 	if muzzle_flash:
@@ -277,22 +281,22 @@ func _build_procedural_gun_model() -> void:
 	# Slide / Barrel
 	var slide := MeshInstance3D.new()
 	var slide_mesh := BoxMesh.new()
-	slide_mesh.size = Vector3(0.06, 0.08, 0.32)
+	slide_mesh.size = Vector3(0.065, 0.085, 0.36)
 	slide.mesh = slide_mesh
 	
 	var dark_mat := StandardMaterial3D.new()
 	dark_mat.albedo_color = Color(0.12, 0.14, 0.18)
-	dark_mat.metallic = 0.8
-	dark_mat.roughness = 0.25
+	dark_mat.metallic = 0.85
+	dark_mat.roughness = 0.2
 	slide.material_override = dark_mat
 	gun_mesh.add_child(slide)
 	
 	# Neon Laser Sight / Accent Strip
 	var strip := MeshInstance3D.new()
 	var strip_mesh := BoxMesh.new()
-	strip_mesh.size = Vector3(0.065, 0.015, 0.26)
+	strip_mesh.size = Vector3(0.07, 0.015, 0.30)
 	strip.mesh = strip_mesh
-	strip.position = Vector3(0, 0.04, 0.02)
+	strip.position = Vector3(0, 0.045, 0.02)
 	
 	var cyan_glow := StandardMaterial3D.new()
 	cyan_glow.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
@@ -300,12 +304,54 @@ func _build_procedural_gun_model() -> void:
 	strip.material_override = cyan_glow
 	gun_mesh.add_child(strip)
 	
+	# Iron Sights (Front & Rear Pins for Authentic Aiming)
+	var front_sight := MeshInstance3D.new()
+	var front_sight_mesh := BoxMesh.new()
+	front_sight_mesh.size = Vector3(0.012, 0.025, 0.015)
+	front_sight.mesh = front_sight_mesh
+	front_sight.position = Vector3(0, 0.055, -0.16)
+	var front_sight_mat := StandardMaterial3D.new()
+	front_sight_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	front_sight_mat.albedo_color = Color(0.0, 1.0, 0.4) # Glowing green front post
+	front_sight.material_override = front_sight_mat
+	gun_mesh.add_child(front_sight)
+	
+	var rear_sight_left := MeshInstance3D.new()
+	var rear_sight_left_mesh := BoxMesh.new()
+	rear_sight_left_mesh.size = Vector3(0.012, 0.02, 0.015)
+	rear_sight_left.mesh = rear_sight_left_mesh
+	rear_sight_left.position = Vector3(-0.02, 0.055, 0.16)
+	var rear_sight_mat := StandardMaterial3D.new()
+	rear_sight_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	rear_sight_mat.albedo_color = Color(1.0, 0.2, 0.2) # Glowing red rear notch
+	rear_sight_left.material_override = rear_sight_mat
+	gun_mesh.add_child(rear_sight_left)
+	
+	var rear_sight_right := MeshInstance3D.new()
+	var rear_sight_right_mesh := BoxMesh.new()
+	rear_sight_right_mesh.size = Vector3(0.012, 0.02, 0.015)
+	rear_sight_right.mesh = rear_sight_right_mesh
+	rear_sight_right.position = Vector3(0.02, 0.055, 0.16)
+	rear_sight_right.material_override = rear_sight_mat
+	gun_mesh.add_child(rear_sight_right)
+	
+	# Muzzle Tip
+	var muzzle := MeshInstance3D.new()
+	var muzzle_mesh := BoxMesh.new()
+	muzzle_mesh.size = Vector3(0.05, 0.05, 0.04)
+	muzzle.mesh = muzzle_mesh
+	muzzle.position = Vector3(0, 0.01, -0.19)
+	var muzzle_mat := StandardMaterial3D.new()
+	muzzle_mat.albedo_color = Color(0.05, 0.05, 0.05)
+	muzzle.material_override = muzzle_mat
+	gun_mesh.add_child(muzzle)
+	
 	# Grip
 	var grip := MeshInstance3D.new()
 	var grip_mesh := BoxMesh.new()
-	grip_mesh.size = Vector3(0.05, 0.18, 0.09)
+	grip_mesh.size = Vector3(0.055, 0.20, 0.09)
 	grip.mesh = grip_mesh
-	grip.position = Vector3(0, -0.11, 0.07)
+	grip.position = Vector3(0, -0.12, 0.08)
 	grip.rotation.x = deg_to_rad(15.0)
 	
 	var grip_mat := StandardMaterial3D.new()
@@ -313,3 +359,12 @@ func _build_procedural_gun_model() -> void:
 	grip_mat.roughness = 0.8
 	grip.material_override = grip_mat
 	gun_mesh.add_child(grip)
+	
+	# Trigger Guard
+	var guard := MeshInstance3D.new()
+	var guard_mesh := BoxMesh.new()
+	guard_mesh.size = Vector3(0.03, 0.08, 0.08)
+	guard.mesh = guard_mesh
+	guard.position = Vector3(0, -0.06, 0.01)
+	guard.material_override = dark_mat
+	gun_mesh.add_child(guard)
