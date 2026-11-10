@@ -57,7 +57,7 @@ func _physics_process(delta: float) -> void:
 	# Enemy Spawning logic in 3D Arena
 	_spawn_cooldown -= delta
 	if _spawn_cooldown <= 0.0:
-		_spawn_cooldown = max(0.8, 2.2 - (current_wave * 0.25))
+		_spawn_cooldown = max(0.8, 1.8 - (current_wave * 0.2))
 		_spawn_enemy()
 
 func start_wave(wave: int) -> void:
@@ -80,6 +80,10 @@ func start_wave(wave: int) -> void:
 		if hud.has_method("update_timer"):
 			hud.update_timer(wave_time_left)
 
+	# Spawn immediate initial wave of enemies right in front of player
+	for i in range(3):
+		_spawn_enemy(true)
+
 func end_wave() -> void:
 	current_state = GameState.SHOP
 	Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
@@ -87,14 +91,22 @@ func end_wave() -> void:
 	if shop_modal and shop_modal.has_method("open_shop"):
 		shop_modal.open_shop()
 
-func _spawn_enemy() -> void:
+func _spawn_enemy(immediate_in_sight: bool = false) -> void:
 	if not enemy_scene or not enemies_container:
 		return
 		
-	# Spawn at perimeter of 3D Arena (radius ~28m to 35m)
-	var angle := randf_range(0, TAU)
-	var spawn_dist := randf_range(22.0, 32.0)
-	var spawn_pos := Vector3(cos(angle) * spawn_dist, 0.5, sin(angle) * spawn_dist)
+	var spawn_pos: Vector3
+	if immediate_in_sight and player:
+		# Spawn ahead of the player in line of sight (12m - 18m away)
+		var forward = -player.global_transform.basis.z
+		var side = player.global_transform.basis.x
+		spawn_pos = player.global_position + forward * randf_range(12.0, 18.0) + side * randf_range(-6.0, 6.0)
+		spawn_pos.y = 0.95
+	else:
+		# Spawn around player within arena perimeter
+		var angle := randf_range(0, TAU)
+		var spawn_dist := randf_range(14.0, 22.0)
+		spawn_pos = Vector3(cos(angle) * spawn_dist, 0.95, sin(angle) * spawn_dist)
 	
 	var en = enemy_scene.instantiate()
 	en.position = spawn_pos
