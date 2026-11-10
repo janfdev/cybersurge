@@ -48,14 +48,30 @@ func _ready() -> void:
 	health_changed.emit(current_health, max_health)
 	ammo_changed.emit(current_ammo, mag_capacity, reserve_ammo)
 
-func _unhandled_input(event: InputEvent) -> void:
+func _input(event: InputEvent) -> void:
 	if is_dead:
 		return
 		
-	# Mouse look
-	if event is InputEventMouseMotion and Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
-		rotate_y(-event.relative.x * mouse_sensitivity)
-		head.rotate_x(-event.relative.y * mouse_sensitivity)
+	# Mouse look in WebAssembly / Desktop: handles both relative motion and captured state
+	if event is InputEventMouseMotion:
+		# If mouse captured OR if user is clicking & dragging, rotate camera
+		var is_captured := (Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED)
+		var is_dragging := Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT)
+		if is_captured or is_dragging:
+			rotate_y(-event.relative.x * mouse_sensitivity)
+			head.rotate_x(-event.relative.y * mouse_sensitivity)
+			head.rotation.x = clamp(head.rotation.x, deg_to_rad(-85.0), deg_to_rad(85.0))
+		
+	# Arrow keys / Q-E keys fallback for camera rotation (ensures aiming always works anywhere)
+	if Input.is_key_pressed(KEY_LEFT) or Input.is_key_pressed(KEY_Q):
+		rotate_y(0.04)
+	elif Input.is_key_pressed(KEY_RIGHT) or Input.is_key_pressed(KEY_E):
+		rotate_y(-0.04)
+	if Input.is_key_pressed(KEY_UP):
+		head.rotate_x(0.03)
+		head.rotation.x = clamp(head.rotation.x, deg_to_rad(-85.0), deg_to_rad(85.0))
+	elif Input.is_key_pressed(KEY_DOWN):
+		head.rotate_x(-0.03)
 		head.rotation.x = clamp(head.rotation.x, deg_to_rad(-85.0), deg_to_rad(85.0))
 		
 	# Capture/release mouse on click or escape
@@ -78,8 +94,19 @@ func _physics_process(delta: float) -> void:
 	if Input.is_action_just_pressed("ui_accept") and is_on_floor():
 		velocity.y = jump_velocity
 
-	# Movement direction
-	var input_dir := Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
+	# WASD Movement direction
+	var move_x := 0.0
+	var move_z := 0.0
+	if Input.is_key_pressed(KEY_A):
+		move_x -= 1.0
+	if Input.is_key_pressed(KEY_D):
+		move_x += 1.0
+	if Input.is_key_pressed(KEY_W):
+		move_z -= 1.0
+	if Input.is_key_pressed(KEY_S):
+		move_z += 1.0
+		
+	var input_dir := Vector2(move_x, move_z).normalized()
 	# GDQuest / scenario-godot-3d-world principle: zero Y before normalizing
 	var direction := (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
 	
