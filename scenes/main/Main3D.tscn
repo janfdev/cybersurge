@@ -1,0 +1,35 @@
+[gd_scene format=3 uid="uid://cymain3d001"]
+
+[ext_resource type="Script" path="res://scenes/main/Main3D.gd" id="1_main3d"]
+[ext_resource type="PackedScene" path="res://scenes/maps/Arena3D.tscn" id="2_arena"]
+[ext_resource type="PackedScene" path="res://scenes/entities/player/PlayerFPS.tscn" id="3_player"]
+[ext_resource type="PackedScene" path="res://scenes/ui/HUD3D.tscn" id="4_hud"]
+[ext_resource type="PackedScene" path="res://scenes/ui/ShopModal.tscn" id="5_shop"]
+[ext_resource type="PackedScene" path="res://scenes/ui/GameOverModal.tscn" id="6_gameover"]
+
+[sub_resource type="Environment" id="Environment_cyber"]
+background_mode = 1
+background_color = Color(0.04, 0.05, 0.07, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.15, 0.18, 0.25, 1)
+ambient_light_energy = 0.8
+tonemap_mode = 2
+
+[node name="Main3D" type="Node3D"]
+script = ExtResource("1_main3d")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_cyber")
+
+[node name="Arena3D" parent="." instance=ExtResource("2_arena")]
+
+[node name="EnemiesContainer" type="Node3D" parent="."]
+
+[node name="PlayerFPS" parent="." instance=ExtResource("3_player")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.2, 0)
+
+[node name="HUD3D" parent="." instance=ExtResource("4_hud")]
+
+[node name="ShopModal" parent="." instance=ExtResource("5_shop")]
+
+[node name="GameOverModal" parent="." instance=ExtResource("6_gameover")]

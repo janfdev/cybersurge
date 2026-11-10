@@ -1,0 +1,43 @@
+[gd_scene format=3 uid="uid://cyplayerfps001"]
+
+[ext_resource type="Script" path="res://scenes/entities/player/PlayerFPS.gd" id="1_fps"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_fps"]
+radius = 0.4
+height = 1.8
+
+[node name="PlayerFPS" type="CharacterBody3D" groups=["player"]]
+collision_layer = 2
+collision_mask = 5
+script = ExtResource("1_fps")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+shape = SubResource("CapsuleShape3D_fps")
+
+[node name="Head" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.65, 0)
+
+[node name="Camera3D" type="Camera3D" parent="Head"]
+current = true
+fov = 80.0
+
+[node name="RayCast3D" type="RayCast3D" parent="Head/Camera3D"]
+target_position = Vector3(0, 0, -120)
+collision_mask = 5
+collide_with_areas = true
+
+[node name="GunPivot" type="Node3D" parent="Head/Camera3D"]
+
+[node name="GunModel" type="Node3D" parent="Head/Camera3D/GunPivot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.28, -0.25, -0.55)
+
+[node name="MuzzleMarker" type="Marker3D" parent="Head/Camera3D/GunPivot/GunModel"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.02, -0.22)
+
+[node name="MuzzleFlash" type="OmniLight3D" parent="Head/Camera3D/GunPivot/GunModel"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.02, -0.3)
+visible = false
+light_color = Color(0, 0.95, 1, 1)
+light_energy = 3.5
+omni_range = 4.0

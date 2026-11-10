@@ -1,0 +1,161 @@
+[gd_scene format=3 uid="uid://cyhud3d001"]
+
+[ext_resource type="Script" path="res://scenes/ui/HUD3D.gd" id="1_hud3d"]
+
+[node name="HUD3D" type="CanvasLayer"]
+script = ExtResource("1_hud3d")
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 32
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 32
+theme_override_constants/margin_bottom = 24
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+
+[node name="TopRow" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 32
+
+[node name="HealthBar" type="ProgressBar" parent="MarginContainer/VBoxContainer/TopRow"]
+custom_minimum_size = Vector2(240, 24)
+layout_mode = 2
+value = 100.0
+show_percentage = false
+
+[node name="WaveLabel" type="Label" parent="MarginContainer/VBoxContainer/TopRow"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "WAVE 1/5"
+
+[node name="TimerLabel" type="Label" parent="MarginContainer/VBoxContainer/TopRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 22
+text = "00:45"
+horizontal_alignment = 1
+
+[node name="ChipsLabel" type="Label" parent="MarginContainer/VBoxContainer/TopRow"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.75, 0, 1)
+theme_override_font_sizes/font_size = 20
+text = "CHIPS: 0"
+
+[node name="Spacer" type="Control" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="BottomRow" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+alignment = 2
+
+[node name="AmmoContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/BottomRow"]
+layout_mode = 2
+
+[node name="WeaponLabel" type="Label" parent="MarginContainer/VBoxContainer/BottomRow/AmmoContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.8, 0.9, 1)
+theme_override_font_sizes/font_size = 14
+text = "PB TACTICAL PISTOL [L-CLICK: FIRE | R: RELOAD]"
+horizontal_alignment = 2
+
+[node name="AmmoLabel" type="Label" parent="MarginContainer/VBoxContainer/BottomRow/AmmoContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0.95, 1, 1)
+theme_override_font_sizes/font_size = 32
+text = "12 / 72"
+horizontal_alignment = 2
+
+[node name="CenterContainer" type="CenterContainer" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Crosshair" type="Control" parent="CenterContainer"]
+custom_minimum_size = Vector2(24, 24)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Top" type="ColorRect" parent="CenterContainer/Crosshair"]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -1.0
+offset_top = 0.0
+offset_right = 1.0
+offset_bottom = 7.0
+grow_horizontal = 2
+color = Color(0, 0.95, 1, 0.85)
+
+[node name="Bottom" type="ColorRect" parent="CenterContainer/Crosshair"]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -1.0
+offset_top = -7.0
+offset_right = 1.0
+offset_bottom = 0.0
+grow_horizontal = 2
+grow_vertical = 0
+color = Color(0, 0.95, 1, 0.85)
+
+[node name="Left" type="ColorRect" parent="CenterContainer/Crosshair"]
+layout_mode = 1
+anchors_preset = 4
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_left = 0.0
+offset_top = -1.0
+offset_right = 7.0
+offset_bottom = 1.0
+grow_vertical = 2
+color = Color(0, 0.95, 1, 0.85)
+
+[node name="Right" type="ColorRect" parent="CenterContainer/Crosshair"]
+layout_mode = 1
+anchors_preset = 6
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -7.0
+offset_top = -1.0
+offset_right = 0.0
+offset_bottom = 1.0
+grow_horizontal = 0
+grow_vertical = 2
+color = Color(0, 0.95, 1, 0.85)
+
+[node name="Dot" type="ColorRect" parent="CenterContainer/Crosshair"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -1.5
+offset_top = -1.5
+offset_right = 1.5
+offset_bottom = 1.5
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(1, 1, 1, 0.9)
+
+[node name="HitCrosshair" type="ColorRect" parent="CenterContainer"]
+custom_minimum_size = Vector2(10, 10)
+layout_mode = 2
+mouse_filter = 2
+color = Color(1, 0.1, 0.3, 0)

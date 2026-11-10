@@ -1,0 +1,62 @@
+[gd_scene format=3 uid="uid://cyenemy3d001"]
+
+[ext_resource type="Script" path="res://scenes/entities/enemies/Enemy3D.gd" id="1_enemy3d"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_en"]
+radius = 0.45
+height = 1.9
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_body"]
+albedo_color = Color(0.18, 0.22, 0.28, 1)
+metallic = 0.8
+roughness = 0.3
+
+[sub_resource type="BoxMesh" id="BoxMesh_body"]
+size = Vector3(0.65, 0.95, 0.45)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_head"]
+albedo_color = Color(0.12, 0.14, 0.18, 1)
+metallic = 0.9
+roughness = 0.2
+
+[sub_resource type="BoxMesh" id="BoxMesh_head"]
+size = Vector3(0.42, 0.42, 0.42)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_eye"]
+shading_mode = 0
+albedo_color = Color(1, 0.08, 0.25, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_eye"]
+size = Vector3(0.3, 0.08, 0.08)
+
+[node name="Enemy3D" type="CharacterBody3D" groups=["enemies"]]
+collision_layer = 4
+collision_mask = 7
+script = ExtResource("1_enemy3d")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.95, 0)
+shape = SubResource("CapsuleShape3D_en")
+
+[node name="Visuals" type="Node3D" parent="."]
+
+[node name="BodyMesh" type="MeshInstance3D" parent="Visuals"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.75, 0)
+material_override = SubResource("StandardMaterial3D_body")
+mesh = SubResource("BoxMesh_body")
+
+[node name="HeadMesh" type="MeshInstance3D" parent="Visuals"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.48, 0)
+material_override = SubResource("StandardMaterial3D_head")
+mesh = SubResource("BoxMesh_head")
+
+[node name="EyeVisor" type="MeshInstance3D" parent="Visuals"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.48, -0.21)
+material_override = SubResource("StandardMaterial3D_eye")
+mesh = SubResource("BoxMesh_eye")
+
+[node name="EyeLight" type="OmniLight3D" parent="Visuals"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.48, -0.35)
+light_color = Color(1, 0.08, 0.25, 1)
+light_energy = 2.0
+omni_range = 3.0
